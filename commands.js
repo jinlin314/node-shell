@@ -2,75 +2,98 @@
 var fs = require('fs');
 const chalk = require('chalk');
 
-module.exports = {
-  pwd : function(cmd){
-    var argvs = process.argv[1].split('/');
-    var path = argvs.slice(0, argvs.length-1);
-    process.stdout.write(chalk.green(path.join('/') + '\n'));
-  },
+var done = function(output){
+  process.stdout.write(chalk.yellow(output + '\n'));
+  process.stdout.write(chalk.yellow('prompt > '));
+}
 
-  date : function(cmd){
-    process.stdout.write(chalk.green(Date() + '\n'));
-  },
+
+module.exports = {
+  pwd : function(cmd){ done(process.cwd());},
+
+  date : function(cmd){ done(Date().toString());},
 
   // read and concat the input files, prints them to the terminal
   cat : function(arg){
-    filename = arg[0];
+    var files = arg.split(' ');
+    var contents = [];
 
-    fs.readFile(filename, 'utf8', function(err, contents){
-      if (err) console.log(err);
-      process.stdout.write(chalk.green(contents + '\n'));
-      process.stdout.write(chalk.yellow('prompt > '));
-    });
+    files.forEach(function(file, index){
+      fs.readFile(file, 'utf8', function(err, fileContents){
+        if (err) process.stdout.write(err);
+        else{
+          contents[index] = fileContents.toString();
+          if(contents.length === files.length){
+            done(contents.join('\n'));
+          }
+        }
+      });// end of readFile callback function
+    });// end of file.forEach callback funciton
   },
 
   // output the first part of files (first 10 lines)
   head : function(arg){
-    filename = arg[0];
+    // filename = arg[0];
+    // later will rivise it to multiple files
+    filename = arg;
     fs.readFile(filename, 'utf8', function(err, contents){
-      if (err) console.log(err);
-      dataArray = contents.split('\n');
+      if (err) process.stdout.write(err);
+      else{
+        var dataArray = contents.trim().split('\n');
+        var output = '';
 
-      for (var i = 0; i < 10 && i < dataArray.length; i++){
-        process.stdout.write(chalk.green(dataArray[i] + '\n'));
+        for (var i = 0; i < 10 && i < dataArray.length; i++){
+          output += dataArray[i] + '\n';
+        }
+
+        done(output);
       }
-
-      process.stdout.write(chalk.yellow('prompt > '));
     });
   },
 
   // output the first part of files (first 10 lines)
   tail : function(arg){
-    filename = arg[0];
+    // filename = arg[0];
+    // later will rivise it to multiple files
+    filename = arg;
     fs.readFile(filename, 'utf8', function(err, contents){
-      if (err) console.log(err);
-      dataArray = contents.split('\n');
-      var i;
-      if (dataArray.length - 10 < 0) i = 0;
-      else i = dataArray.length - 10;
+      if (err) process.stdout.write(err);
+      else{
+        var dataArray = contents.trim().split('\n');
+        var output = '';
+        var i = (dataArray.length - 10 < 0) ? i=0 : i = dataArray.length - 10;
 
-      for (i; i < dataArray.length; i++){
-        process.stdout.write(chalk.green(dataArray[i] + '\n'));
+        for (i; i < dataArray.length; i++){
+          output += dataArray[i] + '\n';
+        }
+        done(output);
       }
-
-      process.stdout.write(chalk.yellow('prompt > '));
     });
   },
 
   ls : function(cmd){
-    // var files = fs.readdirSync('.');
-    // files.forEach((file)=>process.stdout.write(chalk.green(file + ' ')));
     fs.readdir('.', function(err, files){
-      if (err) console.log(err);
-      files.forEach((file)=>process.stdout.write(chalk.green(file + '\t')));
-      process.stdout.write(chalk.yellow('\nprompt > '));
+      if (err) process.stdout.write(err);
+      var output = '';
+
+      files.forEach((file)=> output += file + '\t');
+      done(output);
     })
   },
 
   echo : function(arg){
-    if(arg.toString()=== "$PATH"){
-      process.stdout.write(chalk.green(process.env.PATH));
+    if(arg[0] === '$'){
+      var enVar = arg.slice(1);
+      if(process.env[enVar.toUpperCase()]){
+        output = process.env[enVar.toUpperCase()];
+      }
+    }else{
+      output = arg;
     }
-    process.stdout.write(chalk.green(arg.join(' ') + '\n'));
+    done(output);
+  },
+
+  pipe : function(arg){
+
   }
 }
