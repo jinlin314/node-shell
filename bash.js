@@ -1,14 +1,9 @@
-// console.log(process);
+var commands = require('./commands');
+const chalk = require('chalk');
 
 // Output a prompt
 var prompt = function(){
-  process.stdout.write('prompt > ');
-}
-
-var pwd = function(){
-  var argvs = process.argv[1].split('/');
-  var path = argvs.slice(0, argvs.length-1);
-  return path.join('/');
+  process.stdout.write(chalk.yellow('prompt > '));
 }
 
 
@@ -20,17 +15,13 @@ process.stdin.on('data', function (data) {
   var cmd = data.toString().trim(); // remove the newline
   //process.stdout.write('You typed: ' + cmd );
 
-  switch (cmd) {
-    case 'pwd':
-      process.stdout.write(pwd() + '\n');
-      break;
+  var userCommand = cmd.split(' ')[0];
+  var arg = cmd.split(' ').slice(1);
 
-    case 'date':
-      process.stdout.write(Date() + '\n');
-      break;
-    default:
-      prompt();
-
+  if (!commands.hasOwnProperty(userCommand)){
+    process.stdout.write(chalk.red(cmd + " is not a valid command" + '\n'));
+  }else{
+    commands[userCommand](arg);
   }
 
   // prompt for next inputs
