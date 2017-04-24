@@ -58,10 +58,13 @@ module.exports = {
   },
 
   ls : function(cmd){
-    // var argvs = process.argv[1].split('/');
-    // var path = argvs.slice(0, argvs.length-1).join('/');
-    var files = fs.readdirSync('.');
-    files.forEach((file)=>process.stdout.write(chalk.green(file + ' ')));
+    // var files = fs.readdirSync('.');
+    // files.forEach((file)=>process.stdout.write(chalk.green(file + ' ')));
+    fs.readdir('.', function(err, files){
+      if (err) console.log(err);
+      files.forEach((file)=>process.stdout.write(chalk.green(file + '\t')));
+      process.stdout.write(chalk.yellow('\nprompt > '));
+    })
   },
 
   echo : function(arg){
